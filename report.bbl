@@ -1,0 +1,300 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{doi1996}{book}{}{}
+      \name{author}{2}{}{%
+        {{hash=5d3af159c74990db3191cb03594d07b6}{%
+           family={Doi},
+           familyi={D\bibinitperiod},
+           given={Masao},
+           giveni={M\bibinitperiod}}}%
+        {{hash=1821b1767843b388ea577612de7826ec}{%
+           family={Edwards},
+           familyi={E\bibinitperiod},
+           given={Sam\bibnamedelima F.},
+           giveni={S\bibinitperiod\bibinitdelim F\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Oxford}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{2c48b21ac23af3221d0228b7ea3adbca}
+      \strng{fullhash}{2c48b21ac23af3221d0228b7ea3adbca}
+      \strng{fullhashraw}{2c48b21ac23af3221d0228b7ea3adbca}
+      \strng{bibnamehash}{2c48b21ac23af3221d0228b7ea3adbca}
+      \strng{authorbibnamehash}{2c48b21ac23af3221d0228b7ea3adbca}
+      \strng{authornamehash}{2c48b21ac23af3221d0228b7ea3adbca}
+      \strng{authorfullhash}{2c48b21ac23af3221d0228b7ea3adbca}
+      \strng{authorfullhashraw}{2c48b21ac23af3221d0228b7ea3adbca}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The Theory of Polymer Dynamics}
+      \field{year}{1996}
+    \endentry
+    \entry{doi2013}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=5d3af159c74990db3191cb03594d07b6}{%
+           family={Doi},
+           familyi={D\bibinitperiod},
+           given={Masao},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Oxford}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{5d3af159c74990db3191cb03594d07b6}
+      \strng{fullhash}{5d3af159c74990db3191cb03594d07b6}
+      \strng{fullhashraw}{5d3af159c74990db3191cb03594d07b6}
+      \strng{bibnamehash}{5d3af159c74990db3191cb03594d07b6}
+      \strng{authorbibnamehash}{5d3af159c74990db3191cb03594d07b6}
+      \strng{authornamehash}{5d3af159c74990db3191cb03594d07b6}
+      \strng{authorfullhash}{5d3af159c74990db3191cb03594d07b6}
+      \strng{authorfullhashraw}{5d3af159c74990db3191cb03594d07b6}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Soft Matter Physics}
+      \field{year}{2013}
+    \endentry
+    \entry{trappe2001}{article}{}{}
+      \name{author}{5}{}{%
+        {{hash=acc45ad2efc29df4b2bb1aecb5943c70}{%
+           family={Trappe},
+           familyi={T\bibinitperiod},
+           given={V.},
+           giveni={V\bibinitperiod}}}%
+        {{hash=98c8f9359d2c7502175e6ec5f5b75ba9}{%
+           family={Prasad},
+           familyi={P\bibinitperiod},
+           given={V.},
+           giveni={V\bibinitperiod}}}%
+        {{hash=4d3b63e5104cf1d8fcbb22ed37b62058}{%
+           family={Cipelletti},
+           familyi={C\bibinitperiod},
+           given={L.},
+           giveni={L\bibinitperiod}}}%
+        {{hash=902e8b9637c38d000031cad7271a9fea}{%
+           family={Segre},
+           familyi={S\bibinitperiod},
+           given={P.\bibnamedelimi N.},
+           giveni={P\bibinitperiod\bibinitdelim N\bibinitperiod}}}%
+        {{hash=ae9ecfdef6813d49f28236575f292ccb}{%
+           family={Weitz},
+           familyi={W\bibinitperiod},
+           given={D.\bibnamedelimi A.},
+           giveni={D\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \strng{namehash}{581b77abebed3c65fdd8d4cfea176c19}
+      \strng{fullhash}{4e4f5f9609ca5254449cfefe8e39355e}
+      \strng{fullhashraw}{4e4f5f9609ca5254449cfefe8e39355e}
+      \strng{bibnamehash}{581b77abebed3c65fdd8d4cfea176c19}
+      \strng{authorbibnamehash}{581b77abebed3c65fdd8d4cfea176c19}
+      \strng{authornamehash}{581b77abebed3c65fdd8d4cfea176c19}
+      \strng{authorfullhash}{4e4f5f9609ca5254449cfefe8e39355e}
+      \strng{authorfullhashraw}{4e4f5f9609ca5254449cfefe8e39355e}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Nature}
+      \field{title}{Jamming phase diagram for attractive particles}
+      \field{volume}{411}
+      \field{year}{2001}
+      \field{pages}{772\bibrangedash 775}
+      \range{pages}{4}
+    \endentry
+    \entry{lu2008}{article}{}{}
+      \name{author}{6}{}{%
+        {{hash=00750a5d50853f633d3e7bfef0ed5e5d}{%
+           family={Lu},
+           familyi={L\bibinitperiod},
+           given={P.\bibnamedelimi J.},
+           giveni={P\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+        {{hash=25b4892090cf9b5001d1119af739cf01}{%
+           family={Zaccarelli},
+           familyi={Z\bibinitperiod},
+           given={E.},
+           giveni={E\bibinitperiod}}}%
+        {{hash=2be6a35bcc20c32d22aebd3c4682c855}{%
+           family={Ciulla},
+           familyi={C\bibinitperiod},
+           given={F.},
+           giveni={F\bibinitperiod}}}%
+        {{hash=eafe2f91f377356275eb4369b31ff510}{%
+           family={Schofield},
+           familyi={S\bibinitperiod},
+           given={A.\bibnamedelimi B.},
+           giveni={A\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=48949def9bbf5eac77cd15aa7b420f9f}{%
+           family={Sciortino},
+           familyi={S\bibinitperiod},
+           given={F.},
+           giveni={F\bibinitperiod}}}%
+        {{hash=ae9ecfdef6813d49f28236575f292ccb}{%
+           family={Weitz},
+           familyi={W\bibinitperiod},
+           given={D.\bibnamedelimi A.},
+           giveni={D\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \strng{namehash}{80d5c91ab9623562f06ed0b46a358618}
+      \strng{fullhash}{415c0cf2100e4519a732abec53329dbc}
+      \strng{fullhashraw}{415c0cf2100e4519a732abec53329dbc}
+      \strng{bibnamehash}{80d5c91ab9623562f06ed0b46a358618}
+      \strng{authorbibnamehash}{80d5c91ab9623562f06ed0b46a358618}
+      \strng{authornamehash}{80d5c91ab9623562f06ed0b46a358618}
+      \strng{authorfullhash}{415c0cf2100e4519a732abec53329dbc}
+      \strng{authorfullhashraw}{415c0cf2100e4519a732abec53329dbc}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Nature}
+      \field{title}{Gelation of particles with short-range attraction}
+      \field{volume}{453}
+      \field{year}{2008}
+      \field{pages}{499\bibrangedash 503}
+      \range{pages}{5}
+    \endentry
+    \entry{israelachvili2011}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=ca29df22dd26c2e9accbd893b1185453}{%
+           family={Israelachvili},
+           familyi={I\bibinitperiod},
+           given={Jacob\bibnamedelima N.},
+           giveni={J\bibinitperiod\bibinitdelim N\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Academic Press}%
+      }
+      \strng{namehash}{ca29df22dd26c2e9accbd893b1185453}
+      \strng{fullhash}{ca29df22dd26c2e9accbd893b1185453}
+      \strng{fullhashraw}{ca29df22dd26c2e9accbd893b1185453}
+      \strng{bibnamehash}{ca29df22dd26c2e9accbd893b1185453}
+      \strng{authorbibnamehash}{ca29df22dd26c2e9accbd893b1185453}
+      \strng{authornamehash}{ca29df22dd26c2e9accbd893b1185453}
+      \strng{authorfullhash}{ca29df22dd26c2e9accbd893b1185453}
+      \strng{authorfullhashraw}{ca29df22dd26c2e9accbd893b1185453}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3}
+      \field{title}{Intermolecular and Surface Forces}
+      \field{year}{2011}
+    \endentry
+    \entry{foffi2002}{article}{}{}
+      \name{author}{6}{}{%
+        {{hash=2aff2838951e93f765cf9068db83261f}{%
+           family={Foffi},
+           familyi={F\bibinitperiod},
+           given={G.},
+           giveni={G\bibinitperiod}}}%
+        {{hash=d919c47df5d68c380894f9286eac44fb}{%
+           family={Dawson},
+           familyi={D\bibinitperiod},
+           given={K.\bibnamedelimi A.},
+           giveni={K\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=4afa386d8cb6ae4c3822fee67f01314f}{%
+           family={Buldyrev},
+           familyi={B\bibinitperiod},
+           given={S.\bibnamedelimi V.},
+           giveni={S\bibinitperiod\bibinitdelim V\bibinitperiod}}}%
+        {{hash=48949def9bbf5eac77cd15aa7b420f9f}{%
+           family={Sciortino},
+           familyi={S\bibinitperiod},
+           given={F.},
+           giveni={F\bibinitperiod}}}%
+        {{hash=25b4892090cf9b5001d1119af739cf01}{%
+           family={Zaccarelli},
+           familyi={Z\bibinitperiod},
+           given={E.},
+           giveni={E\bibinitperiod}}}%
+        {{hash=29d827299505c5757ea6250bbd42fc2f}{%
+           family={Tartaglia},
+           familyi={T\bibinitperiod},
+           given={P.},
+           giveni={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{da64da4c6b50832ae0ac6d09ca146c2b}
+      \strng{fullhash}{c4d11619c94ea8d2c7c243e1bd6138a6}
+      \strng{fullhashraw}{c4d11619c94ea8d2c7c243e1bd6138a6}
+      \strng{bibnamehash}{da64da4c6b50832ae0ac6d09ca146c2b}
+      \strng{authorbibnamehash}{da64da4c6b50832ae0ac6d09ca146c2b}
+      \strng{authornamehash}{da64da4c6b50832ae0ac6d09ca146c2b}
+      \strng{authorfullhash}{c4d11619c94ea8d2c7c243e1bd6138a6}
+      \strng{authorfullhashraw}{c4d11619c94ea8d2c7c243e1bd6138a6}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Phys.\ Rev.\ E}
+      \field{title}{Evidence for an unusual dynamical-arrest scenario in short-ranged colloidal systems}
+      \field{volume}{65}
+      \field{year}{2002}
+      \field{pages}{050802(R)}
+      \range{pages}{-1}
+    \endentry
+    \entry{kloeden1992}{book}{}{}
+      \name{author}{2}{}{%
+        {{hash=7b32249850edcace60b1c231a0f5fb51}{%
+           family={Kloeden},
+           familyi={K\bibinitperiod},
+           given={Peter\bibnamedelima E.},
+           giveni={P\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+        {{hash=a4fb5859192206ba44cf72178b85abb6}{%
+           family={Platen},
+           familyi={P\bibinitperiod},
+           given={Eckhard},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Berlin}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{0183f9b6362d5aa8d2faeea78d274490}
+      \strng{fullhash}{0183f9b6362d5aa8d2faeea78d274490}
+      \strng{fullhashraw}{0183f9b6362d5aa8d2faeea78d274490}
+      \strng{bibnamehash}{0183f9b6362d5aa8d2faeea78d274490}
+      \strng{authorbibnamehash}{0183f9b6362d5aa8d2faeea78d274490}
+      \strng{authornamehash}{0183f9b6362d5aa8d2faeea78d274490}
+      \strng{authorfullhash}{0183f9b6362d5aa8d2faeea78d274490}
+      \strng{authorfullhashraw}{0183f9b6362d5aa8d2faeea78d274490}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Numerical Solution of Stochastic Differential Equations}
+      \field{year}{1992}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
