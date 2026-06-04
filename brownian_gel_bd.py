@@ -156,23 +156,18 @@ def percolates(pos, adj):
                 return True, len(comp)
     return False, 0
 
-from pathlib import Path
-
-OUT = Path("figures")
-OUT.mkdir(exist_ok=True)
-
 def plot_snapshot(pos, step):
     plt.figure(figsize=(5,5))
     plt.scatter(pos[:,0], pos[:,1], s=8)
-    plt.xlim(0,L); plt.ylim(0,L); plt.gca().set_aspect("equal")
+    plt.xlim(0,L); plt.ylim(0,L); plt.gca().set_aspect('equal')
     plt.title(f"{case}, t={step*dt:.2f}")
     plt.tight_layout()
-
-    filename = OUT / f"snapshot_{case}_{step:07d}.png"
-    plt.savefig(filename, dpi=160)
-    print("saved:", filename.resolve())
-
+    plt.savefig(f"snapshot_{case}_{step:07d}.png", dpi=160)
     plt.close()
+
+filename = f"snapshot_{case}_{step:07d}.png"
+plt.savefig(filename, dpi=160)
+print("snapshot saved:", filename)
 
 # ---------------- Run ----------------
 pos = init_lattice_noise()
