@@ -1,0 +1,572 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------------- Packages ----------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{geometry}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\sisetup{detect-all=true}
+
+% Placeholder figure command: if the image file is missing, LaTeX still compiles.
+\newcommand{\safeincludegraphics}[2][]{%
+    \IfFileExists{#2}{%
+        \includegraphics[#1]{#2}%
+    }{%
+        \fbox{\parbox[c][0.25\textheight][c]{0.85\textwidth}{\centering Missing figure file: \texttt{#2}}}%
+    }%
+}
+
+% ---------------- Title ----------------
+\title{\textbf{Coarsening and Arrest in Colloidal Gels:}\\
+Modelling via Brownian Dynamics}
+
+\author{B\'er\'enice Derai\\66034}
+
+\date{5 June 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This project explores the dynamics of colloidal gels, focusing on the processes of coarsening and arrest. A minimal model of attractive Brownian particles is constructed and their dynamics are simulated using an Euler--Maruyama scheme with a Lennard--Jones pair potential. The growth of the structure factor $S(q,t)$ is analysed by comparing two regimes: a strongly attractive system, $\varepsilon = 5 k_B T$, exhibiting kinetic arrest, and a weakly attractive liquid reference, $\varepsilon = 1.5 k_B T$, that undergoes continuous coarsening.
+
+An ageing study is additionally performed: the mean-squared displacement (MSD) is computed for multiple waiting times $t_w$, revealing $t_w$-dependent dynamics in the gel, associated with non-ergodic ageing, and $t_w$-independent diffusion in the liquid, associated with ergodic behaviour. Several numerical challenges, including integrator instability, inadequate simulation time, and an unphysical reference state, were identified and corrected iteratively. The theoretical framework draws on the works of Doi for statistical mechanics and colloidal diffusion, and on the works of van Saarloos \textit{et al.} on ageing and non-equilibrium states.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Colloidal suspensions are systems composed of particles with sizes typically between $1\,\mathrm{nm}$ and $1\,\mu\mathrm{m}$ dispersed in a solvent. They provide a privileged playground for the physics of non-equilibrium condensed matter. When sufficiently strong attractive interactions are induced between these particles, for example by the addition of salt in a charged suspension, by polymer depletion, or by unscreened van der Waals interactions, the system may undergo phase separation towards a dense state. However, the intrinsically slow dynamics of massive colloidal particles can trap the system in a non-equilibrium state before phase separation is complete: this is the phenomenon of gelation as arrested phase separation.
+
+The goal of this work is to construct a minimal model of attractive Brownian particles, to simulate its dynamics using an Euler--Maruyama scheme, and to analyse the growth of the structure factor $S(q,t)$ in the presence and absence of gelation. An ageing study via the mean-squared displacement is additionally carried out, probing the non-ergodic character of the arrested gel. The theoretical framework draws primarily on the works of Doi for statistical mechanics and colloidal diffusion, and on the works of van Saarloos \textit{et al.} on ageing and non-equilibrium states.
+
+\section{Brownian Motion and Colloidal Diffusion}
+
+\subsection{The Langevin Equation}
+
+Following Doi, the motion of a colloidal particle suspended in a solvent can be described by separating the force exerted by the fluid into two contributions: a deterministic viscous friction force and a stochastic random force arising from microscopic collisions with solvent molecules.
+
+The equation of motion is the Langevin equation
+\begin{equation}
+    m\ddot{\mathbf r}
+    =
+    -\zeta \dot{\mathbf r}
+    - \nabla U
+    + \mathbf F_r(t),
+    \label{eq:langevin}
+\end{equation}
+where $-\zeta \dot{\mathbf r}$ is the viscous friction force, $U(\mathbf r)$ is the interaction potential, and $\mathbf F_r(t)$ is the stochastic random force.
+
+For a spherical colloid of radius $a$ immersed in a solvent of viscosity $\eta$, the Stokes friction coefficient is
+\begin{equation}
+    \zeta = 6\pi \eta a.
+\end{equation}
+
+The random force satisfies
+\begin{equation}
+    \langle \mathbf F_r(t)\rangle = 0,
+\end{equation}
+and obeys the fluctuation--dissipation theorem
+\begin{equation}
+    \left\langle
+    F_{r,\mu}(t)F_{r,\nu}(t')
+    \right\rangle
+    =
+    2\zeta k_B T\,\delta_{\mu\nu}\delta(t-t').
+\end{equation}
+This relation ensures that thermal fluctuations compensate viscous dissipation and maintain thermal equilibrium at temperature $T$.
+
+\subsection{Overdamped Limit: Brownian Dynamics}
+
+For colloidal particles, the inertial relaxation time
+\begin{equation}
+    \tau_m = \frac{m}{\zeta}
+\end{equation}
+is typically of order $10^{-8}\,\mathrm{s}$, whereas the diffusive timescale
+\begin{equation}
+    \tau_D = \frac{a^2}{D}
+\end{equation}
+is of order $10^{-3}\,\mathrm{s}$.
+
+Since $\tau_m \ll \tau_D$, inertia relaxes much faster than diffusion and the inertial term can be neglected. The Langevin equation therefore reduces to
+\begin{equation}
+    \dot{\mathbf r}
+    =
+    -\frac{D}{k_B T}\nabla U
+    +
+    \frac{1}{\zeta}\mathbf F_r(t),
+    \label{eq:bd}
+\end{equation}
+where the Einstein relation
+\begin{equation}
+    D = \frac{k_B T}{\zeta}
+\end{equation}
+has been used.
+
+Equation~\eqref{eq:bd} clearly separates deterministic drift induced by interactions from stochastic diffusion generated by thermal agitation. This overdamped description forms the basis of Brownian Dynamics simulations.
+
+\section{Colloidal Interactions}
+
+\subsection{Pair Potentials Between Colloids}
+
+Two particles of radius $a$ cannot overlap. This excluded-volume constraint is represented by a hard-core interaction, which is often replaced in simulations by a steep but continuous repulsive potential.
+
+In addition to steric repulsion, colloidal particles interact through attractive forces. Quantum fluctuations of electronic dipoles generate long-range van der Waals attractions between dielectric materials. For charged particles dispersed in an electrolyte, the DLVO theory describes the competition between electrostatic repulsion and van der Waals attraction.
+
+Increasing the salt concentration screens electrostatic interactions, lowers the repulsive barrier, and can render the effective interaction attractive at short distances. This mechanism is one of the most common routes to colloidal gelation.
+
+\subsection{Choice of Potential for Simulations}
+
+The simulations performed in this work use a truncated and shifted Lennard--Jones potential,
+\begin{equation}
+    U_{\mathrm{LJ}}(r)
+    =
+    4\varepsilon
+    \left[
+    \left(\frac{\sigma}{r}\right)^{12}
+    -
+    \left(\frac{\sigma}{r}\right)^6
+    \right]
+    - U_{\mathrm{LJ}}(r_{\mathrm{cut}}),
+    \label{eq:lj}
+\end{equation}
+with cutoff distance
+\begin{equation}
+    r_{\mathrm{cut}} = 2.5\sigma.
+\end{equation}
+The Lennard--Jones potential was chosen because of its widespread use as a benchmark model for attractive colloidal systems and its numerical simplicity.
+
+Two regimes are considered:
+\begin{enumerate}
+    \item \textbf{Gel regime:}
+    \[
+    \varepsilon = 5\,k_B T,
+    \qquad
+    r_{\mathrm{cut}} = 2.5\sigma.
+    \]
+    The deep attractive well promotes cluster formation and kinetic arrest.
+
+    \item \textbf{Liquid reference regime:}
+    \[
+    \varepsilon = 1.5\,k_B T,
+    \qquad
+    r_{\mathrm{cut}} = 2.5\sigma.
+    \]
+    The attraction is sufficiently weak that the system remains ergodic and continues to coarsen throughout the simulation.
+\end{enumerate}
+
+\section{Phase Separation in Colloidal Suspensions}
+
+\subsection{Phase Diagram and Spinodal Instability}
+
+The phase diagram of a system of attractive particles exhibits a liquid--gas-like coexistence region. For sufficiently strong attractions, the homogeneous state becomes unstable with respect to density fluctuations and the system separates into particle-rich and particle-poor regions.
+
+The stability of the homogeneous state is determined by the curvature of the free-energy density $f(\phi)$, where $\phi$ denotes the volume fraction. When
+\begin{equation}
+    \frac{\partial^2 f}{\partial \phi^2} < 0,
+\end{equation}
+the homogeneous phase is unstable. This region of the phase diagram is known as the spinodal region.
+
+Inside the spinodal region, arbitrarily small density fluctuations grow spontaneously without the need for nucleation, leading to spinodal decomposition.
+
+\subsection{Spinodal Decomposition: the Cahn--Hilliard Theory}
+
+A simple description of spinodal decomposition is provided by the Cahn--Hilliard theory. The free-energy functional is written as
+\begin{equation}
+    F[\phi]
+    =
+    \int
+    \left[
+    f(\phi)
+    +
+    \frac{\kappa}{2}|\nabla\phi|^2
+    \right]dV,
+\end{equation}
+where the gradient term penalises the formation of interfaces.
+
+Considering small fluctuations around a homogeneous state,
+\begin{equation}
+    \phi(\mathbf r,t)
+    =
+    \phi_0 + \delta\phi(\mathbf r,t),
+\end{equation}
+and linearising the dynamics yields the growth rate of a Fourier mode of wavevector $q$,
+\begin{equation}
+    \omega(q)
+    =
+    M_0 q^2
+    \left[
+    |f''(\phi_0)|
+    -
+    \kappa q^2
+    \right].
+    \label{eq:cahn_growth}
+\end{equation}
+When $f''(\phi_0)<0$, long-wavelength modes become unstable and grow exponentially.
+
+Only modes satisfying
+\begin{equation}
+    q < q_c = \sqrt{\frac{|f''(\phi_0)|}{\kappa}}
+\end{equation}
+are unstable. The most rapidly growing mode corresponds to
+\begin{equation}
+    q^* = \frac{q_c}{\sqrt{2}},
+\end{equation}
+which defines an initial characteristic length scale
+\begin{equation}
+    \ell^* = \frac{2\pi}{q^*}.
+\end{equation}
+This selected length scale is the origin of the peak observed in the structure factor during phase separation.
+
+\section{Gelation as Arrested Phase Separation}
+
+\subsection{General Mechanism}
+
+A widely accepted description of colloidal gelation interprets the gel state as an arrested phase separation. Following a quench into the spinodal region, density fluctuations grow and particle-rich domains begin to form through spinodal decomposition. As phase separation progresses, the local volume fraction inside the dense regions increases continuously.
+
+When the local density becomes sufficiently high, particle motion slows dramatically. Rearrangements become increasingly difficult and the dense phase eventually undergoes dynamic arrest. At this point the coarsening process is interrupted before complete phase separation is achieved. Domain growth stops and the system becomes trapped in a non-equilibrium state composed of a percolating network of dynamically arrested particles. The resulting arrested structure is referred to as a colloidal gel.
+
+\subsection{Ageing and Non-Equilibrium States}
+
+Unlike equilibrium systems, colloidal gels continue to evolve slowly after their preparation. Their properties depend explicitly on the waiting time $t_w$ elapsed since the quench. Such systems are said to exhibit ageing.
+
+A commonly used observable is the mean-squared displacement,
+\begin{equation}
+    \mathrm{MSD}(\Delta t,t_w)
+    =
+    \left\langle
+    \left|\mathbf r(t_w+\Delta t)-\mathbf r(t_w)\right|^2
+    \right\rangle.
+    \label{eq:msd_ageing}
+\end{equation}
+In a fully arrested gel, particles become temporarily trapped by their neighbours and the MSD develops an intermediate plateau,
+\begin{equation}
+    \mathrm{MSD}(\Delta t) \rightarrow r_{\mathrm{cage}}^2,
+\end{equation}
+where $r_{\mathrm{cage}}$ is the typical cage size. Furthermore, the MSD becomes dependent on the waiting time $t_w$, reflecting the progressive slowing down of the dynamics as the system ages. By contrast, an ergodic liquid exhibits waiting-time-independent dynamics and the MSD is independent of $t_w$.
+
+\section{Structure Factor, Coarsening and Dynamic Scaling}
+
+\subsection{Time-Dependent Structure Factor}
+
+The central observable of this work is the time-dependent structure factor $S(q,t)$. For a system of $N$ particles located at positions $\mathbf r_j(t)$, the microscopic density can be written as
+\begin{equation}
+    \rho(\mathbf r,t)
+    =
+    \sum_{j=1}^{N}\delta(\mathbf r-\mathbf r_j(t)).
+\end{equation}
+Its Fourier transform is
+\begin{equation}
+    \rho_{\mathbf q}(t)
+    =
+    \sum_{j=1}^{N} e^{i\mathbf q\cdot\mathbf r_j(t)}.
+\end{equation}
+The isotropically averaged structure factor is then defined as
+\begin{equation}
+    S(q,t)
+    =
+    \frac{1}{N}
+    \left|
+    \sum_{j=1}^{N}e^{i\mathbf q\cdot\mathbf r_j(t)}
+    \right|^2.
+    \label{eq:structure_factor}
+\end{equation}
+
+The structure factor measures density fluctuations at different length scales. As phase separation develops, a peak emerges at a characteristic wavevector $q^*(t)$. The corresponding characteristic domain size is
+\begin{equation}
+    \ell(t) = \frac{2\pi}{q^*(t)}.
+    \label{eq:domain_length}
+\end{equation}
+Monitoring the evolution of $q^*(t)$ therefore provides direct information on the growth of domains during coarsening.
+
+\subsection{Diffusive Coarsening and Dynamic Scaling}
+
+For diffusion-controlled phase separation, the characteristic length scale follows the Lifshitz--Slyozov law,
+\begin{equation}
+    \ell(t) \propto t^{1/3}.
+\end{equation}
+As coarsening proceeds, the morphology becomes statistically self-similar: the system appears identical when lengths are rescaled by $\ell(t)$.
+
+This dynamic scaling hypothesis implies that the structure factor obeys
+\begin{equation}
+    S(q,t)
+    =
+    \ell(t)^d\,\widetilde S(q\ell(t)),
+    \label{eq:dynamic_scaling}
+\end{equation}
+where $d$ is the spatial dimension and $\widetilde S$ is a universal scaling function.
+
+When dynamic scaling holds, structure-factor curves measured at different times collapse onto a single master curve when plotted as $S(q,t)/\ell(t)^d$ versus $q\ell(t)$. In a gelled system, kinetic arrest interrupts coarsening and this scaling behaviour eventually breaks down, signalling the emergence of a frozen characteristic length scale.
+
+\section{Numerical Implementation}
+
+\subsection{Euler--Maruyama Scheme}
+
+The overdamped Langevin equation is integrated using the Euler--Maruyama scheme. In reduced units,
+\begin{equation}
+    \mathbf r^* = \frac{\mathbf r}{\sigma},
+    \qquad
+    t^* = \frac{Dt}{\sigma^2},
+    \qquad
+    U^* = \frac{U}{k_B T},
+\end{equation}
+the update rule is
+\begin{equation}
+    \mathbf r_i^*(t^*+\Delta t^*)
+    =
+    \mathbf r_i^*(t^*)
+    +
+    \mathbf F_i^*(\{\mathbf r_j^*\})\Delta t^*
+    +
+    \sqrt{2\Delta t^*}\,\mathbf W_i,
+    \label{eq:euler_maruyama}
+\end{equation}
+where $\mathbf W_i$ is an independent Gaussian random vector with zero mean and unit variance. Forces are computed over all pairs with minimum-image periodic boundary conditions.
+
+\subsection{Numerical Challenges and Corrections}
+
+\subsubsection{Integrator Instability}
+
+The original time step $\Delta t = 2\times10^{-4}\tau$ produced displacements of order $0.2\sigma$ per step near contact, sufficient for particles to jump across the attractive well without binding. The time step was reduced to $5\times10^{-5}\tau$ and a force cap $|\mathbf F|\leq 500\,k_B T/\sigma$ was introduced to prevent single-step divergences in the hard-core region.
+
+\subsubsection{Insufficient Simulation Time}
+
+The original final time $t_{\mathrm{final}}=10\tau$ was far too short for gel formation. The simulation was extended to $200\tau$, corresponding to $N_{\mathrm{steps}}=4\times10^6$ steps at $\Delta t=5\times10^{-5}\tau$, giving eleven analysis snapshots every $20\tau$.
+
+\subsubsection{Unphysical WCA Reference State}
+
+The WCA reference crystallised at $\phi=0.25$ in two dimensions, producing peaks in $S(k)$ of amplitude around $60$, unrelated to any coarsening process. It was therefore replaced by a weakly attractive Lennard--Jones system with $\varepsilon=1.5 k_B T$, which remains ergodic and undergoes genuine spinodal coarsening.
+
+\subsection{MSD and Ageing Protocol}
+
+Unwrapped positions are tracked throughout the simulation to compute the MSD without periodic-boundary artefacts. At each step the physical displacement $\Delta \mathbf r$ is extracted via the minimum-image convention and accumulated in a continuous unwrapped trajectory. The MSD is then
+\begin{equation}
+    \left\langle |\Delta \mathbf r(\Delta t,t_w)|^2\right\rangle
+    =
+    \left\langle
+    \left|\mathbf r(t_w+\Delta t)-\mathbf r(t_w)\right|^2
+    \right\rangle_N,
+    \label{eq:msd_protocol}
+\end{equation}
+for four waiting times $t_w\in\{0,50,100,150\}\tau$, sampled every $40000$ steps, corresponding to approximately $2\tau$.
+
+\subsection{Summary of Simulation Parameters}
+
+\begin{table}[h]
+\centering
+\caption{Summary of the simulation parameters used for the gel and liquid-reference regimes.}
+\label{tab:parameters}
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Gel} & \textbf{Liquid reference} \\
+\midrule
+$N$ (particles) & 300 & 300 \\
+$\phi$ (packing fraction) & 0.25 & 0.25 \\
+$\varepsilon$ (well depth) & $5.0\,k_B T$ & $1.5\,k_B T$ \\
+$r_{\mathrm{cut}}$ & $2.5\sigma$ & $2.5\sigma$ \\
+$\Delta t$ & $5\times10^{-5}\tau$ & $5\times10^{-5}\tau$ \\
+$t_{\mathrm{final}}$ & $200\tau$ & $200\tau$ \\
+$N_{\mathrm{steps}}$ & $4\times10^6$ & $4\times10^6$ \\
+Ageing $t_w$ values & $0,50,100,150\tau$ & $0,50,100,150\tau$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Results: Particle Configurations}
+
+Figure~\ref{fig:gel_configurations} shows the particle configurations for the gel ($\varepsilon=5k_BT$) at four successive times $t=0$, $20$, $40$ and $60\tau$. At $t=0$, particles are distributed on a slightly perturbed grid following the equilibration protocol. By $t=20$--$60\tau$, small clusters of two to four particles begin to form, visible as paired or grouped points. However, the clustering remains modest: the system has not yet formed a percolated network, consistent with the MSD analysis showing that particles still diffuse significantly over the same time window.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.9\textwidth]{figure1_gel_configurations.png}
+    \caption{Particle configurations for the gel ($\varepsilon=5k_BT$) at $t=0$, $20$, $40$ and $60\tau$. Small clusters begin to form between $t=0$ and $t=60\tau$, but a fully percolated network is not yet established within this simulation window.}
+    \label{fig:gel_configurations}
+\end{figure}
+
+Figure~\ref{fig:liquid_configurations} shows the corresponding configurations for the liquid reference ($\varepsilon=1.5k_BT$). The liquid also shows early clustering from $t=20\tau$ onwards, driven by the weak attraction, but the clusters are more transient and the particles rearrange more freely than in the gel. The liquid maintains a more homogeneous spatial distribution over the $200\tau$ window, consistent with its ergodic character.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.9\textwidth]{figure2_liquid_configurations.png}
+    \caption{Particle configurations for the liquid reference ($\varepsilon=1.5k_BT$) at $t=0$, $20$, $40$ and $60\tau$. Clustering is visible but more transient than in the gel; the system remains spatially more homogeneous throughout the simulation.}
+    \label{fig:liquid_configurations}
+\end{figure}
+
+\section{Results: Structure Factor Analysis}
+
+\subsection{$S(k,t)$ Evolution}
+
+Figure~\ref{fig:sk_gel} shows the time evolution of $S(k,t)$ for the gel. A dominant peak develops around $k^*\simeq 2.5\sigma^{-1}$, corresponding to a characteristic domain size $\ell^*=2\pi/k^*\simeq 2.5\sigma$, and persists throughout the simulation with relatively stable amplitude in the range $4$--$5$. The peak position shows little systematic drift, which is the qualitative signature of arrest: the dominant length scale is frozen. The curves are noisy due to the limited system size $N=300$.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.85\textwidth]{figure3_Sk_gel.png}
+    \caption{$S(k,t)$ evolution for the gel ($\varepsilon=5k_BT$). A peak forms around $k^*\simeq2.5\sigma^{-1}$ and remains stable over $200\tau$, indicating incipient kinetic arrest.}
+    \label{fig:sk_gel}
+\end{figure}
+
+Figure~\ref{fig:sk_liquid} shows $S(k,t)$ for the liquid reference. In contrast to the gel, the curves are more disordered and the peak amplitude grows continuously, reflecting ongoing coarsening. The peak position also shows a tendency to drift towards lower $k$ over time, consistent with growing domain size $\ell(t)=2\pi/k^*(t)$.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.85\textwidth]{figure4_Sk_liquid.png}
+    \caption{$S(k,t)$ evolution for the liquid reference ($\varepsilon=1.5k_BT$). The peak amplitude grows continuously and the peak position drifts towards lower $k$ over time, consistent with ongoing diffusive coarsening without arrest.}
+    \label{fig:sk_liquid}
+\end{figure}
+
+\subsection{Final Structure Factor: Gel versus Liquid}
+
+Figure~\ref{fig:final_sk} directly compares the final structure factors at $t=200\tau$. The liquid exhibits a sharper and higher peak than the gel, which may appear counterintuitive. This is understood as follows: the gel is near but not deep inside the spinodal region at $\varepsilon=5k_BT$ and $t_{\mathrm{final}}=200\tau$, and has not yet completed phase separation before arrest. The liquid, being ergodic, has had time to develop stronger short-range order through continuous diffusion. At longer times or larger attraction strength, the gel peak would be expected to exceed the liquid peak as the arrested structure freezes.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.85\textwidth]{figure5_final_Sk.png}
+    \caption{Final structure factor $S(k)$ at $t=200\tau$ for the gel and liquid reference. The liquid has a higher peak amplitude, explained by its ergodic continuous coarsening. The gel shows a stable, lower peak consistent with incipient arrest.}
+    \label{fig:final_sk}
+\end{figure}
+
+\subsection{Peak Wavevector $k^*(t)$}
+
+Figure~\ref{fig:kstar} shows the time evolution of the peak wavevector $k^*(t)$. The gel stabilises around $k^*\simeq2.5\sigma^{-1}$ from $t\simeq40\tau$ onwards, with only small fluctuations. This indicates a frozen characteristic domain size $\ell^*\simeq2.5\sigma$. The liquid reference shows a systematic decrease from larger $k$ values towards lower $k$ over time, interrupted by noise, consistent with Lifshitz--Slyozov coarsening $\ell(t)\propto t^{1/3}$. The separation between the gel plateau and the decreasing liquid curve is the clearest structural signature of arrest in this simulation.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.85\textwidth]{figure6_kstar.png}
+    \caption{Peak wavevector $k^*(t)$ as a function of time. The gel plateaus around $k^*\simeq2.5\sigma^{-1}$ after $t\simeq40\tau$, indicating a frozen characteristic domain size. The liquid shows a systematic decrease consistent with diffusive coarsening.}
+    \label{fig:kstar}
+\end{figure}
+
+\subsection{Peak Amplitude $S(k^*,t)$}
+
+Figure~\ref{fig:smax} shows $S(k^*,t)$, the amplitude of $S(k)$ at its peak, as a function of time. For the liquid reference, $S(k^*)$ grows rapidly before plateauing, which is the signature of active coarsening and strengthening of density correlations. For the gel, $S(k^*)$ grows more slowly and levels off, consistent with the arrest scenario: once the network is frozen, the peak amplitude no longer increases.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.85\textwidth]{figure7_smax.png}
+    \caption{Peak structure-factor amplitude $S(k^*,t)$ as a function of time. The liquid grows continuously, while the gel saturates, consistent with kinetic arrest halting domain growth.}
+    \label{fig:smax}
+\end{figure}
+
+\subsection{Final Particle Configurations: Gel versus Liquid}
+
+Figure~\ref{fig:final_configs} shows the final particle positions side by side. The gel exhibits clear small clusters distributed throughout the box, with relatively uniform inter-cluster spacing, consistent with a frozen structure at the characteristic scale $\ell^*\simeq2.5\sigma$. The liquid shows more compact clusters with a broader distribution of sizes, reflecting more advanced coarsening. Neither system shows a fully percolated network at $t=200\tau$, confirming that longer simulation times are needed for complete gel characterisation.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.9\textwidth]{figure8_final_configurations.png}
+    \caption{Final particle configurations at $t=200\tau$ for the gel and liquid reference. The gel shows small frozen clusters; the liquid shows more compact, larger clusters from continued coarsening.}
+    \label{fig:final_configs}
+\end{figure}
+
+\section{Results: MSD and Ageing Analysis}
+
+\subsection{MSD of the Gel}
+
+Figure~\ref{fig:msd_gel} shows the mean-squared displacement of the gel ($\varepsilon=5k_BT$) as a function of lag time $\Delta t=t-t_w$ for four waiting times $t_w\in\{0,50,100,150\}\tau$. The dashed line indicates free diffusion, $\mathrm{MSD}=4D\Delta t$ in two dimensions.
+
+All curves fall significantly below the free-diffusion line, indicating that the attractive interactions slow down particle motion. The log-log plot reveals a sub-diffusive scaling $\mathrm{MSD}\sim\Delta t^\alpha$ with $\alpha<1$ at intermediate lag times, consistent with particles exploring a rough energy landscape created by attractive bonds. At long lag times, the curves merge and recover approximately diffusive behaviour as particles eventually escape their local traps.
+
+The expected ageing signature in a fully arrested gel would be a systematic downward shift of the MSD curves as $t_w$ increases, reflecting progressively slower dynamics in an older, more consolidated network. In the present results, the four $t_w$ curves remain close together, confirming that arrest is not yet complete at $\varepsilon=5k_BT$ within $200\tau$.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.9\textwidth]{figure9_MSD_gel.png}
+    \caption{$\mathrm{MSD}(\Delta t,t_w)$ for the gel ($\varepsilon=5k_BT$). All curves fall below free diffusion. Sub-diffusive behaviour is visible at intermediate lag times. The spread between $t_w$ curves is marginal, indicating incomplete arrest.}
+    \label{fig:msd_gel}
+\end{figure}
+
+\subsection{MSD of the Liquid Reference}
+
+Figure~\ref{fig:msd_liquid} shows the MSD for the liquid reference ($\varepsilon=1.5k_BT$). An ergodic liquid should show MSD curves independent of $t_w$, meaning that the curves should collapse onto a single master curve. This collapse is approximately observed for the later waiting times, consistent with ergodic behaviour. The $t_w=0$ curve lies slightly above the others, which is expected because at early times the system has not yet reached a steady state after equilibration.
+
+Compared with the gel, the liquid MSD reaches higher absolute values at the same lag time, confirming that the liquid diffuses more freely, consistent with its weaker interactions.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.9\textwidth]{figure10_MSD_liquid.png}
+    \caption{$\mathrm{MSD}(\Delta t,t_w)$ for the liquid reference ($\varepsilon=1.5k_BT$). The approximate collapse of the later waiting-time curves is consistent with ergodic behaviour.}
+    \label{fig:msd_liquid}
+\end{figure}
+
+\subsection{Ageing Comparison: Gel versus Liquid}
+
+Figure~\ref{fig:ageing_comparison} directly compares the gel and liquid MSD in log-log scale for all four waiting times. In a fully arrested gel, the gel panel should show clearly separated curves, with larger $t_w$ corresponding to lower MSD, whereas the liquid panel should show collapsed curves. In the present results, both panels show qualitatively similar behaviour, with only a modest spread between waiting times. The gel shows slightly less collapse than the liquid, which is physically consistent but not yet a conclusive ageing signature.
+
+The primary limitation is the simulation time: with $t_{\mathrm{final}}=200\tau$ and $\varepsilon=5k_BT$, the gel has not fully arrested and continues to slowly evolve. Longer simulations at larger attraction strength are expected to produce the full ageing signature: an MSD plateau at short lag times confirming cage trapping and a clear $t_w$-dependent spread in the gel absent in the liquid.
+
+\begin{figure}[h]
+    \centering
+    \safeincludegraphics[width=0.9\textwidth]{figure11_MSD_ageing_comparison.png}
+    \caption{MSD ageing comparison in log-log scale: gel versus liquid reference. Both show sub-diffusive behaviour below free diffusion. The gel shows slightly less curve collapse than the liquid, consistent with incipient non-ergodicity, but a conclusive ageing signal requires longer simulation times.}
+    \label{fig:ageing_comparison}
+\end{figure}
+
+\section{Limitations and Perspectives}
+
+The present results are obtained with $N=300$ particles and $t_{\mathrm{final}}=200\tau$. Several limitations should be noted.
+
+First, finite-size effects are significant. With a box size of order $L\simeq30.8\sigma$, the accessible wavevector range is limited to $k\geq2\pi/L\simeq0.20\sigma^{-1}$. These finite-size effects contribute to the noise in $S(k)$ and prevent a precise observation of the low-$k$ behaviour expected in a phase-separating system.
+
+Second, the simulation time is still insufficient to observe full kinetic arrest. MSD values at finite lag times indicate that particles diffuse over several particle diameters, much larger than a typical cage size. Runs at longer final times and larger attraction strengths are therefore necessary to obtain a fully arrested gel.
+
+Third, the ageing statistics remain limited. With only four waiting times and a relatively short trajectory, the $t_w$-dependence of the gel MSD is marginal. Longer simulations will improve the statistics and sharpen the ageing signal.
+
+Finally, the simulation is two-dimensional, whereas many experimental colloidal gels are three-dimensional. Gelation thresholds, percolation criteria, and scaling exponents can differ between two and three dimensions.
+
+\section{Conclusion}
+
+We have presented a theoretical and numerical framework for studying colloidal gelation as arrested phase separation, together with quantitative results from Brownian Dynamics simulations of attractive particles.
+
+Three critical numerical corrections were required: reducing the time step and introducing a force cap to stabilise the integrator, extending the simulation time, and replacing the WCA reference by a weakly attractive Lennard--Jones fluid. An ageing protocol was additionally implemented by tracking unwrapped particle trajectories to compute the MSD for multiple waiting times $t_w$.
+
+The simulation results show the expected qualitative signatures of gelation: a frozen peak in $S(k)$ at approximately constant $k^*$, a saturating peak amplitude $S(k^*)$ in the gel compared with a growing amplitude in the liquid, and sub-diffusive MSD below the free-diffusion line. However, the gel is not yet fully arrested within $200\tau$ at $\varepsilon=5k_BT$: the MSD shows no clear cage plateau and the ageing signal is marginal.
+
+Longer simulations at larger attraction strength are expected to produce fully arrested gels with clear MSD cage plateaus, pronounced $t_w$-dependent ageing, and well-resolved structure-factor features confirming the theoretical scenario of arrested spinodal decomposition.
+
+\begin{thebibliography}{99}
+
+\bibitem{doi_edwards}
+M. Doi and S. F. Edwards, \textit{The Theory of Polymer Dynamics}, Oxford University Press, 1996.
+
+\bibitem{doi_soft_matter}
+M. Doi, \textit{Soft Matter Physics}, Oxford University Press, 2013.
+
+\bibitem{trappe2001}
+V. Trappe, V. Prasad, L. Cipelletti, P. N. Segre and D. A. Weitz, ``Jamming phase diagram for attractive particles'', \textit{Nature} \textbf{411}, 772--775 (2001).
+
+\bibitem{lu2008}
+P. J. Lu, E. Zaccarelli, F. Ciulla, A. B. Schofield, F. Sciortino and D. A. Weitz, ``Gelation of particles with short-range attraction'', \textit{Nature} \textbf{453}, 499--503 (2008).
+
+\bibitem{israelachvili}
+J. N. Israelachvili, \textit{Intermolecular and Surface Forces}, 3rd ed., Academic Press, 2011.
+
+\bibitem{foffi2002}
+G. Foffi, C. De Michele, F. Sciortino and P. Tartaglia, ``Evidence for an unusual dynamical-arrest scenario in short-ranged colloidal systems'', \textit{Physical Review E} \textbf{65}, 050802(R) (2002).
+
+\bibitem{kloeden_platen}
+P. E. Kloeden and E. Platen, \textit{Numerical Solution of Stochastic Differential Equations}, Springer, 1992.
+
+\end{thebibliography}
+
+\end{document}

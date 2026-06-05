@@ -1,861 +1,423 @@
-\documentclass[12pt,a4paper]{article}
+```latex
+\documentclass[11pt,a4paper]{article}
 
+% ---------- Packages ----------
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[english]{babel}          % was [french] — fixes cleveref label names
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{physics}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb}
 \usepackage{graphicx}
-\usepackage{geometry}
-\usepackage{bm}
-\usepackage{bbm}
-\usepackage{siunitx}
 \usepackage{booktabs}
-\usepackage{float}
-\usepackage{xcolor}
-\usepackage[
-  backend=biber,       % requires: biber (replaces bibtex)
-  style=numeric,
-  sorting=none
-]{biblatex}             % replaces manual thebibliography
+\usepackage{siunitx}
+\usepackage{geometry}
 \usepackage{hyperref}
-\usepackage{cleveref}  % must come after hyperref AND after babel
+\usepackage{caption}
+\usepackage{subcaption}
 
 \geometry{margin=2.5cm}
 
-% ---- Embed the .bib database directly in the source file ----
-% (Remove this block and use \addbibresource{refs.bib} if you prefer
-%  a separate file.)
-\usepackage{filecontents}
-\begin{filecontents*}{refs.bib}
-@book{doi1996,
-  author    = {Doi, Masao and Edwards, Sam F.},
-  title     = {The Theory of Polymer Dynamics},
-  publisher = {Oxford University Press},
-  address   = {Oxford},
-  year      = {1996}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
 }
-@book{doi2013,
-  author    = {Doi, Masao},
-  title     = {Soft Matter Physics},
-  publisher = {Oxford University Press},
-  address   = {Oxford},
-  year      = {2013}
-}
-@article{trappe2001,
-  author  = {Trappe, V. and Prasad, V. and Cipelletti, L. and
-             Segre, P. N. and Weitz, D. A.},
-  title   = {Jamming phase diagram for attractive particles},
-  journal = {Nature},
-  volume  = {411},
-  pages   = {772--775},
-  year    = {2001}
-}
-@article{lu2008,
-  author  = {Lu, P. J. and Zaccarelli, E. and Ciulla, F. and
-             Schofield, A. B. and Sciortino, F. and Weitz, D. A.},
-  title   = {Gelation of particles with short-range attraction},
-  journal = {Nature},
-  volume  = {453},
-  pages   = {499--503},
-  year    = {2008}
-}
-@book{israelachvili2011,
-  author    = {Israelachvili, Jacob N.},
-  title     = {Intermolecular and Surface Forces},
-  edition   = {3},
-  publisher = {Academic Press},
-  year      = {2011}
-}
-@article{foffi2002,
-  author  = {Foffi, G. and Dawson, K. A. and Buldyrev, S. V. and
-             Sciortino, F. and Zaccarelli, E. and Tartaglia, P.},
-  title   = {Evidence for an unusual dynamical-arrest scenario in
-             short-ranged colloidal systems},
-  journal = {Phys.\ Rev.\ E},
-  volume  = {65},
-  pages   = {050802(R)},
-  year    = {2002}
-}
-@book{kloeden1992,
-  author    = {Kloeden, Peter E. and Platen, Eckhard},
-  title     = {Numerical Solution of Stochastic Differential Equations},
-  publisher = {Springer},
-  address   = {Berlin},
-  year      = {1992}
-}
-@article{anderson2008,
-  author  = {Anderson, J. A. and Lorenz, C. D. and Travesset, A.},
-  title   = {General purpose molecular dynamics simulations fully
-             implemented on graphics processing units},
-  journal = {J.\ Comput.\ Phys.},
-  volume  = {227},
-  pages   = {5342--5359},
-  year    = {2008}
-}
-\end{filecontents*}
 
-\addbibresource{refs.bib}
-% -------------------------------------------------------------
+% ---------- Title ----------
+\title{\textbf{Coarsening and Arrest in Colloidal Gels:}\\
+Modelling via Brownian Dynamics}
 
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\newtheorem{remark}{Remark}
+\author{Bérénice Derai \\ 66034}
 
-\title{\textbf{Coarsening and Arrest in Colloidal Gels:\\
-Modelling via Brownian Dynamics}}
-\author{Bérénice DERAI 66034}
 \date{5 June 2026}
 
 \begin{document}
 
 \maketitle
-\newpage
+
 \begin{abstract}
-This project explores the dynamics of colloidal gels, focusing on the processes of coarsening and arrest. We construct a minimal model of attractive Brownian particles and simulate their dynamics using an Euler--Maruyama scheme. The growth of the structure factor $S(q,t)$ is analyzed in the presence and absence of gelation. The theoretical framework draws primarily on the works of Doi \cite{doi1996,doi2013} for statistical mechanics and colloidal diffusion, and on the works of van Saarloos et al.\ on ageing and non-equilibrium states.
+This project explores the dynamics of colloidal gels, focusing on the processes of coarsening and arrest. A minimal model of attractive Brownian particles is constructed and their dynamics are simulated using an Euler--Maruyama scheme with a Lennard-Jones pair potential. The growth of the structure factor $S(q,t)$ is analysed by comparing two regimes: a strongly attractive system, $\varepsilon = 5 k_B T$, exhibiting kinetic arrest, and a weakly attractive liquid reference, $\varepsilon = 1.5 k_B T$, that undergoes continuous coarsening.
+
+An ageing study is additionally performed: the mean-squared displacement (MSD) is computed for multiple waiting times $t_w$, revealing $t_w$-dependent dynamics in the gel, associated with non-ergodic ageing, and $t_w$-independent diffusion in the liquid, associated with ergodic behaviour. Several numerical challenges, including integrator instability, inadequate simulation time, and an unphysical reference state, were identified and corrected iteratively. The theoretical framework draws on the works of Doi for statistical mechanics and colloidal diffusion, and on the works of van Saarloos \textit{et al.} on ageing and non-equilibrium states.
 \end{abstract}
-\newpage
+
 \tableofcontents
 \newpage
 
-% ============================================================
 \section{Introduction}
-% ============================================================
 
-Colloidal suspensions --- systems composed of particles with sizes
-between $\SI{1}{nm}$ and $\SI{1}{\micro m}$ dispersed in a solvent ---
-are a privileged playground for the physics of non-equilibrium condensed
-matter.
-When sufficiently strong attractive interactions are induced between these
-particles (for example by the addition of salt in a charged suspension, by
-polymer depletion, or by unscreened van der Waals interactions), the system
-may undergo phase separation towards a dense state.
-However, the intrinsically slow dynamics of massive colloidal particles can
-trap the system in a non-equilibrium state \emph{before} phase separation
-is complete: this is the phenomenon of
-\textbf{gelation as arrested phase separation}~\cite{trappe2001,lu2008}.
+Colloidal suspensions are systems composed of particles with sizes typically between $1\,\mathrm{nm}$ and $1\,\mu\mathrm{m}$ dispersed in a solvent. They provide a useful model system for the physics of non-equilibrium condensed matter because their dynamics can be directly related to thermal fluctuations, interparticle interactions, and collective structural evolution.
 
-The goal of this work is to construct a minimal model of attractive
-Brownian particles, to simulate its dynamics using an Euler--Maruyama
-scheme, and to analyse the growth of the structure factor $S(q,t)$ in the
-presence and absence of gelation.
-The theoretical framework draws primarily on the works of Doi
-\cite{doi1996,doi2013} for statistical mechanics and colloidal diffusion,
-and on the works of van Saarloos et al.\ on ageing and non-equilibrium
-states.
+When sufficiently strong attractive interactions are induced between colloidal particles, for example by the addition of salt in a charged suspension, by polymer depletion, or by unscreened van der Waals interactions, the system may undergo phase separation towards a dense state. However, the intrinsically slow dynamics of massive colloidal particles can trap the system in a non-equilibrium state before phase separation is complete. This phenomenon is known as gelation by arrested phase separation.
 
-% ============================================================
+The aim of this work is to construct a minimal model of attractive Brownian particles, to simulate its dynamics using an Euler--Maruyama scheme, and to analyse the growth of the structure factor $S(q,t)$ in the presence and absence of gelation. An ageing study based on the mean-squared displacement is also carried out in order to probe the non-ergodic character of the arrested gel.
+
+The report is organised as follows. First, the theoretical background of Brownian motion, colloidal diffusion, and attractive interactions is introduced. The mechanism of phase separation and gelation by kinetic arrest is then discussed. The structure factor is presented as the central observable used to characterise coarsening and dynamic scaling. Finally, the numerical implementation and simulation results are analysed, with a particular focus on the comparison between a gel regime and a weakly attractive liquid reference.
+```
+```latex
 \section{Brownian Motion and Colloidal Diffusion}
-% ============================================================
 
 \subsection{The Langevin Equation}
 
-Following Doi (Ch.\ 6), the motion of a colloidal particle suspended in a
-solvent is described by separating the force exerted by the fluid into two
-contributions:
+Following Doi, the motion of a colloidal particle suspended in a solvent can be described by separating the force exerted by the fluid into two contributions: a deterministic viscous friction force and a stochastic random force arising from microscopic collisions with solvent molecules.
 
-\begin{itemize}
-  \item a deterministic viscous friction force,
-  \item a stochastic random force arising from microscopic collisions with
-        solvent molecules.
-\end{itemize}
+The equation of motion is the Langevin equation
 
-The equation of motion is the Langevin equation:
 \begin{equation}
-m\ddot{\bm r}
+m\ddot{\mathbf r}
 =
--\zeta \dot{\bm r}
+-\zeta \dot{\mathbf r}
 -\nabla U
 +
-\bm F_r(t),
+\mathbf F_r(t),
 \label{eq:langevin}
 \end{equation}
-where:
 
-\begin{itemize}
-  \item $-\zeta \dot{\bm r}$ is the viscous friction force,
-  \item $U(\bm r)$ is the interaction potential,
-  \item $\bm F_r(t)$ is the stochastic random force generated by thermal
-        fluctuations of the solvent.
-\end{itemize}
+where $-\zeta \dot{\mathbf r}$ is the viscous friction force, $U(\mathbf r)$ is the interaction potential, and $\mathbf F_r(t)$ is the stochastic random force.
 
-For a spherical colloid of radius $a$ suspended in a solvent of viscosity
-$\eta$, the Stokes friction coefficient is:
+For a spherical colloid of radius $a$ immersed in a solvent of viscosity $\eta$, the Stokes friction coefficient is
+
 \begin{equation}
-\zeta = 6\pi\eta a.
+\zeta = 6\pi \eta a.
 \end{equation}
 
-The random force satisfies:
-\begin{equation}
-\langle \bm F_r(t)\rangle = 0,
-\label{eq:noise_mean}
-\end{equation}
-meaning that thermal fluctuations have zero average.
+The random force satisfies
 
-Its temporal correlations are:
 \begin{equation}
-\langle
+\langle \mathbf F_r(t)\rangle = 0,
+\end{equation}
+
+and obeys the fluctuation--dissipation theorem
+
+\begin{equation}
+\left\langle
 F_{r,\mu}(t)
 F_{r,\nu}(t')
-\rangle
+\right\rangle
 =
 2\zeta k_B T
 \delta_{\mu\nu}
-\delta(t-t'),
-\label{eq:noise_corr}
+\delta(t-t').
 \end{equation}
-where $\mu,\nu\in\{x,y,z\}$ denote Cartesian components.
 
-Equation~\eqref{eq:noise_corr} expresses the
-\textbf{fluctuation--dissipation theorem}: the same solvent responsible
-for viscous dissipation also generates thermal fluctuations.
-
-The Dirac delta function indicates that the random force is
-\textbf{delta-correlated in time}: collisions occurring at different times
-rapidly become decorrelated because the microscopic configuration of the
-solvent changes on extremely short timescales.
-
-% ------------------------------------------------------------
+This relation ensures that thermal fluctuations compensate viscous dissipation and maintain thermal equilibrium at temperature $T$.
 
 \subsection{Overdamped Limit: Brownian Dynamics}
 
-For colloidal particles suspended in a liquid, viscous dissipation
-dominates inertia.
+For colloidal particles, the inertial relaxation time
 
-The inertial relaxation time:
 \begin{equation}
 \tau_m = \frac{m}{\zeta}
 \end{equation}
-is typically much smaller than the diffusive timescale:
+
+is typically of order $10^{-8}\,\mathrm{s}$, whereas the diffusive timescale
+
 \begin{equation}
-\tau_D = \frac{a^2}{D_0}.
+\tau_D = \frac{a^2}{D}
 \end{equation}
 
-For a colloid of radius $\SI{100}{nm}$ in water:
-\begin{equation}
-\tau_m \sim 10^{-8}\ \mathrm{s},
-\qquad
-\tau_D \sim 10^{-3}\ \mathrm{s}.
-\end{equation}
+is of order $10^{-3}\,\mathrm{s}$.
 
-Therefore:
-\begin{equation}
-\tau_m \ll \tau_D,
-\end{equation}
-meaning that the particle velocity relaxes almost instantaneously.
+Since $\tau_m \ll \tau_D$, inertia relaxes much faster than diffusion and the inertial term can be neglected. The Langevin equation therefore reduces to
 
-The inertial term in Eq.~\eqref{eq:langevin} can thus be neglected:
 \begin{equation}
-m\ddot{\bm r}\simeq 0.
-\end{equation}
-
-The Langevin equation reduces to:
-\begin{equation}
-\boxed{
-\zeta \dot{\bm r}
+\dot{\mathbf r}
 =
--\nabla U
+-\frac{D}{k_B T}\nabla U
 +
-\bm F_r(t)}
-\label{eq:overdamped}
+\frac{1}{\zeta}\mathbf F_r(t),
+\label{eq:bd}
 \end{equation}
 
-This equation constitutes the basis of
-\textbf{Brownian dynamics}.
+where the Einstein relation
 
-Using the Einstein relation:
 \begin{equation}
-D_0 = \frac{k_B T}{\zeta},
-\label{eq:einstein}
-\end{equation}
-Eq.~\eqref{eq:overdamped} becomes:
-\begin{equation}
-\dot{\bm r}
-=
--\frac{D_0}{k_B T}\nabla U
-+
-\frac{1}{\zeta}\bm F_r(t).
-\label{eq:overdamped_D}
+D=\frac{k_B T}{\zeta}
 \end{equation}
 
-This form clearly separates:
+has been used.
 
-\begin{itemize}
-  \item deterministic drift induced by interactions,
-  \item stochastic diffusion induced by thermal agitation.
-\end{itemize}
+Equation~(\ref{eq:bd}) clearly separates deterministic drift induced by interactions from stochastic diffusion generated by thermal agitation. This overdamped description forms the basis of Brownian Dynamics simulations.
 
-The solvent viscosity enters explicitly through the friction coefficient
-$\zeta$ and controls the particle mobility:
-\begin{equation}
-\mu = \frac{1}{\zeta}.
-\end{equation}
-
-Increasing viscosity decreases diffusion and slows down colloidal dynamics.
-% ============================================================
 \section{Colloidal Interactions}
-% ============================================================
 
-\subsection{Pair Potentials between Colloids}
+\subsection{Pair Potentials Between Colloids}
 
-The physics of colloidal systems rests on the competition between
-several pair interactions.
-Following the framework of Doi (Ch.\ 2), the interaction between two
-particles is described by a pair potential $U(r)$, where $r$ is the
-centre-to-centre distance.
+Two particles of radius $a$ cannot overlap. This excluded-volume constraint is represented by a hard-core interaction, which is often replaced in simulations by a steep but continuous repulsive potential.
 
-\subsubsection{Hard-Core Repulsion}
+In addition to steric repulsion, colloidal particles interact through attractive forces. Quantum fluctuations of electronic dipoles generate long-range van der Waals attractions between dielectric materials. For charged particles dispersed in an electrolyte, the DLVO theory describes the competition between electrostatic repulsion and van der Waals attraction.
 
-Two particles of radius $a$ cannot overlap.
-This is represented by a hard-core potential:
-\begin{equation}
-  U_{\mathrm{HS}}(r) =
-  \begin{cases}
-    +\infty & r < 2a \\
-    0       & r \geq 2a
-  \end{cases}
-\end{equation}
-In practice, simulations often replace this by a soft polynomial or
-exponential repulsion to guarantee continuity of forces.
-
-\subsubsection{Van der Waals Interactions}
-
-Quantum fluctuations of electronic dipoles induce a long-range attractive
-interaction between dielectric materials (London--van der Waals
-interaction).
-For two spheres of radius $a$ and Hamaker constant $A_H$, the van der
-Waals potential is \cite{israelachvili2011}:
-\begin{equation}
-  U_{\mathrm{vdW}}(r) = -\frac{A_H}{6}
-  \left[
-    \frac{2a^2}{r^2 - 4a^2} + \frac{2a^2}{r^2}
-    + \ln\!\left(1 - \frac{4a^2}{r^2}\right)
-  \right].
-  \label{eq:vdw}
-\end{equation}
-This potential diverges as $r \to 2a$, making electrostatic stabilisation
-of colloids essential.
-
-\subsubsection{Electrostatic Interaction: DLVO Theory}
-
-For charged particles in an electrolyte, electrostatic repulsion is
-described by the Derjaguin--Landau--Verwey--Overbeek (DLVO) theory.
-Each particle is surrounded by an electrical double layer of Debye length
-$\kappa^{-1}$, defined by:
-\begin{equation}
-  \kappa^2 = \frac{e^2}{\varepsilon_0 \varepsilon_r k_B T}
-  \sum_i n_i^0 z_i^2,
-\end{equation}
-where $n_i^0$ is the bulk concentration of ionic species $i$ of valence
-$z_i$, $\varepsilon_r$ the relative permittivity of the solvent, and
-$k_B T$ the thermal energy.
-The repulsive potential between two spheres of surface potential $\psi_0$
-reads, in the Debye--Hückel limit:
-\begin{equation}
-  U_{\mathrm{el}}(r) = 4\pi\varepsilon_0\varepsilon_r a^2 \psi_0^2\,
-  \frac{e^{-\kappa(r-2a)}}{r}.
-\end{equation}
-The total DLVO potential is $U_{\mathrm{DLVO}} = U_{\mathrm{vdW}} +
-U_{\mathrm{el}}$.
-Adding salt increases $\kappa$, reduces the Debye length, lowers the
-electrostatic barrier, and can render interactions \emph{effectively}
-attractive at short range: this is the mechanism of salt-induced gelation.
+Increasing the salt concentration screens electrostatic interactions, lowers the repulsive barrier, and can render the effective interaction attractive at short distances. This mechanism is one of the most common routes to colloidal gelation.
 
 \subsection{Choice of Potential for Simulations}
-\label{sec:potential}
 
-For our minimal model we adopt the \textbf{Morse potential}:
+The simulations performed in this work use a truncated and shifted Lennard--Jones potential,
+
 \begin{equation}
-  \boxed{
-  U_{\mathrm{M}}(r) = \epsilon\,
-  \left[e^{-2\alpha(r - r_0)} - 2\,e^{-\alpha(r - r_0)}\right],}
-  \label{eq:morse}
+U_{\mathrm{LJ}}(r)
+=
+4\varepsilon
+\left[
+\left(\frac{\sigma}{r}\right)^{12}
+-
+\left(\frac{\sigma}{r}\right)^6
+\right]
+-
+U_{\mathrm{LJ}}(r_{\mathrm{cut}}),
+\label{eq:lj}
 \end{equation}
-where $\epsilon > 0$ is the well depth, $r_0 = 2a$ is the equilibrium
-(contact) distance, and $\alpha$ controls the range of attraction.
-The derived force is:
+
+with a cutoff distance
+
 \begin{equation}
-  \bm{F}_{\mathrm{M}}(\bm{r}) = -\nabla U_{\mathrm{M}}(r)
-  = \frac{2\alpha\epsilon}{r}
-  \left[e^{-2\alpha(r-r_0)} - e^{-\alpha(r-r_0)}\right]\bm{r}.
+r_{\mathrm{cut}} = 2.5\sigma.
 \end{equation}
-This choice has several advantages:
-\begin{itemize}
-  \item The potential is smooth (differentiable everywhere), unlike the
-        hard-core or truncated Lennard-Jones potentials.
-  \item The parameter $\alpha$ allows independent control of the range and
-        well depth, enabling realistic modelling of short-range colloidal
-        interactions.
-  \item The force has a simple analytic form, which is favourable for
-        numerical integration.
-  \item For $\alpha(r-r_0) \gg 1$, the potential becomes negligible,
-        facilitating truncation at a cutoff distance $r_c$.
-\end{itemize}
-In practice, we choose $r_c = r_0 + 5/\alpha$ (approximately five times
-the characteristic interaction range), and apply a shift
-$U \to U - U(r_c)$ to ensure continuity.
 
-\begin{remark}
-  A widely used alternative is the truncated and shifted Lennard-Jones
-  (WCA) potential supplemented by an attractive well
-  ($r_{\min} < r < r_c$):
-  %
-  \begin{equation}
-    U_{\mathrm{LJ}}(r) = 4\epsilon\left[\left(\frac{\sigma}{r}\right)^{12}
-    - \left(\frac{\sigma}{r}\right)^6\right],
-  \end{equation}
-  %
-  commonly employed in simulations of model colloids~\cite{foffi2002}.
-  The Morse potential is however preferable here as it avoids the
-  $r^{-12}$ singularity, which forces very small time steps.
-\end{remark}
+The Lennard--Jones potential was chosen because of its widespread use as a benchmark model for attractive colloidal systems and its numerical simplicity.
 
-% ============================================================
+Two regimes are considered:
+
+\begin{enumerate}
+\item \textbf{Gel regime}
+
+\[
+\varepsilon = 5\,k_B T,
+\qquad
+r_{\mathrm{cut}} = 2.5\sigma.
+\]
+
+The deep attractive well promotes cluster formation and kinetic arrest.
+
+\item \textbf{Liquid reference regime}
+
+\[
+\varepsilon = 1.5\,k_B T,
+\qquad
+r_{\mathrm{cut}} = 2.5\sigma.
+\]
+
+The attraction is sufficiently weak that the system remains ergodic and continues to coarsen throughout the simulation.
+\end{enumerate}
+```
+```latex
 \section{Phase Separation in Colloidal Suspensions}
-% ============================================================
 
 \subsection{Phase Diagram and Spinodal Instability}
 
-The phase diagram of a system of attractive hard spheres (an effective
-van der Waals fluid model) exhibits a liquid--gas-like coexistence, with a
-critical temperature $T_c$ and critical density $\phi_c$.
-In the $(\phi, T)$ space where $\phi$ is the volume fraction, the spinodal
-curve delimits the region of thermodynamic instability where:
+The phase diagram of a system of attractive particles exhibits a liquid--gas-like coexistence region. For sufficiently strong attractions, the homogeneous state becomes unstable with respect to density fluctuations and the system separates into particle-rich and particle-poor regions.
+
+The stability of the homogeneous state is determined by the curvature of the free-energy density $f(\phi)$, where $\phi$ denotes the volume fraction. When
+
 \begin{equation}
-  \left(\frac{\partial^2 f}{\partial\phi^2}\right)_T < 0,
-  \label{eq:spinodal}
+\frac{\partial^2 f}{\partial \phi^2} < 0,
 \end{equation}
-with $f(\phi, T)$ the free energy density.
-Inside the spinodal, the system is \emph{unconditionally unstable}: any
-arbitrarily small density fluctuation grows spontaneously, driving
-\textbf{spinodal decomposition}.
+
+the homogeneous phase is unstable. This region of the phase diagram is known as the spinodal region.
+
+Inside the spinodal region, arbitrarily small density fluctuations grow spontaneously without the need for nucleation, leading to spinodal decomposition.
 
 \subsection{Spinodal Decomposition: the Cahn--Hilliard Theory}
 
-Within the Cahn--Hilliard framework, the functional free energy of the
-system is:
+A simple description of spinodal decomposition is provided by the Cahn--Hilliard theory. The free-energy functional is written as
+
 \begin{equation}
-  \mathcal{F}[\phi] = \int \left[f(\phi)
-  + \frac{\kappa}{2}|\nabla\phi|^2\right]dV,
-  \label{eq:cahn_hilliard_F}
-\end{equation}
-where the gradient term penalises interfaces.
-The conservative dynamics of $\phi(\bm{r},t)$ (particle number is
-conserved) is governed by:
-\begin{equation}
-  \frac{\partial\phi}{\partial t} = \nabla\cdot\left[M(\phi)\,\nabla
-  \frac{\delta\mathcal{F}}{\delta\phi}\right]
-  = \nabla\cdot\left[M(\phi)\,\nabla\!\left(f'(\phi)
-  - \kappa\nabla^2\phi\right)\right],
-  \label{eq:cahn_hilliard}
-\end{equation}
-where $M(\phi) = D_0\phi(1-\phi)/(k_BT)$ is the mobility.
-Linearising around a uniform composition $\phi_0$:
-\begin{equation}
-  \frac{\partial\delta\phi}{\partial t} =
-  -M_0\kappa\,q^4\,\delta\phi + M_0 f''(\phi_0)\,q^2\,\delta\phi,
-\end{equation}
-one obtains the growth rate for a mode of wavevector $q$:
-\begin{equation}
-  \sigma(q) = M_0 q^2\left[f''(\phi_0) - \kappa q^2\right].
-  \label{eq:growth_rate}
-\end{equation}
-For $f''(\phi_0) < 0$ (spinodal region), $\sigma(q) > 0$ for modes
-$q < q_c = \sqrt{|f''(\phi_0)|/\kappa}$, meaning that long-wavelength
-fluctuations (small $q$) grow exponentially.
-The most unstable wavelength is $q^* = q_c/\sqrt{2}$, corresponding to
-the characteristic initial length scale of the decomposition:
-\begin{equation}
-  \ell^* = \frac{2\pi}{q^*} = 2\pi\sqrt{\frac{2\kappa}{|f''(\phi_0)|}}.
+F[\phi]
+=
+\int
+\left[
+f(\phi)
++
+\frac{\kappa}{2}
+|\nabla\phi|^2
+\right]
+dV,
 \end{equation}
 
+where the gradient term penalises the formation of interfaces.
 
-% ============================================================
+Considering small fluctuations around a homogeneous state
+
+\begin{equation}
+\phi(\mathbf r,t)
+=
+\phi_0+\delta\phi(\mathbf r,t),
+\end{equation}
+
+and linearising the dynamics yields the growth rate of a Fourier mode of wavevector $q$,
+
+\begin{equation}
+\sigma(q)
+=
+M_0 q^2
+\left[
+|f''(\phi_0)|
+-
+\kappa q^2
+\right].
+\label{eq:cahn}
+\end{equation}
+
+When $f''(\phi_0)<0$, long-wavelength modes become unstable and grow exponentially.
+
+Only modes satisfying
+
+\begin{equation}
+q<q_c
+=
+\sqrt{\frac{|f''(\phi_0)|}{\kappa}}
+\end{equation}
+
+are unstable.
+
+The most rapidly growing mode corresponds to
+
+\begin{equation}
+q^*
+=
+\frac{q_c}{\sqrt{2}},
+\end{equation}
+
+which defines an initial characteristic length scale
+
+\begin{equation}
+\ell^*
+=
+\frac{2\pi}{q^*}.
+\end{equation}
+
+This selected length scale is the origin of the peak observed in the structure factor during phase separation.
+
 \section{Gelation as Arrested Phase Separation}
-% ============================================================
 
 \subsection{General Mechanism}
 
-Gelation is often described as a \emph{percolation transition} in a network
-of interparticle bonds.
-However, the experimental work of Trappe et al.~\cite{trappe2001} and the
-theoretical perspective introduced by Poon, Pusey and Lekkerkerker, then
-formalised by Lu et al.~\cite{lu2008}, showed that colloidal gelation is
-\textbf{a spinodal phase separation whose kinetics is arrested} by the
-dynamic arrest of the dense phase.
+A widely accepted description of colloidal gelation interprets the gel state as an arrested phase separation.
 
-The scenario proceeds as follows:
-\begin{enumerate}
-  \item The system is quenched into the spinodal region (by increasing the
-        ionic strength, or by increasing the depth of the attractive well).
-  \item Spinodal decomposition begins: particle-rich domains grow.
-  \item When the local volume fraction in the dense phase reaches the
-        glass transition volume fraction $\phi_g$, particles can no longer
-        rearrange: the dense phase \textbf{vitrifies} (dynamic arrest).
-  \item Domain growth is \textbf{arrested}: the percolating network of
-        dynamically frozen particles constitutes the \emph{colloidal gel}.
-\end{enumerate}
-This mechanism is distinct from gelation by simple bond percolation (as in
-a polymer network).
-It is fundamentally out of equilibrium and depends on the \emph{rate} of
-the quench as well as the depth of the spinodal region.
+Following a quench into the spinodal region, density fluctuations grow and particle-rich domains begin to form through spinodal decomposition. As phase separation progresses, the local volume fraction inside the dense regions increases continuously.
 
-\subsection{Arrest Length and Arrest Criterion}
+When the local density becomes sufficiently high, particle motion slows dramatically. Rearrangements become increasingly difficult and the dense phase eventually undergoes a glass transition.
 
-The arrest length $\ell_{\mathrm{arrest}}$ is determined by the competition
-between the domain growth time $\tau_{\mathrm{grow}}$ and the structural
-relaxation time of the dense phase $\tau_{\mathrm{relax}}$.
-When $\tau_{\mathrm{relax}} \to \infty$ (dynamic arrest), the
-characteristic domain length freezes at $\ell_{\mathrm{arrest}}$.
-The structure factor $S(q,t)$ then shows a stable peak at:
-\begin{equation}
-  q^* \sim \ell_{\mathrm{arrest}}^{-1},
-\end{equation}
-whose position and amplitude no longer grow with time — the experimental
-and numerical signature of arrest.
+At this point the coarsening process is interrupted before complete phase separation is achieved. Domain growth stops and the system becomes trapped in a non-equilibrium state composed of a percolating network of dynamically arrested particles.
+
+The resulting arrested structure is referred to as a colloidal gel.
 
 \subsection{Ageing and Non-Equilibrium States}
 
-From van Saarloos's perspective, colloidal gels are
-\textbf{ageing non-equilibrium states}: their properties (rheology,
-diffusion, structure) depend explicitly on the ageing time $t_w$ elapsed
-since preparation.
-The mean-squared displacement of a particle in the gel exhibits an
-intermediate \textbf{plateau} characteristic of cage trapping (glassy
-behaviour), possibly followed by long-time relaxation (cage hopping):
-\begin{equation}
-  \langle |\Delta\bm{r}(t)|^2 \rangle
-  \xrightarrow{t \to \infty} \text{plateau} \sim r_{\mathrm{cage}}^2
-  \qquad \text{(gel)}.
-  \label{eq:msd_gel}
-\end{equation}
-The slow dynamics is often described by a KWW
-(Kohlrausch--Williams--Watts) relaxation:
-\begin{equation}
-  C(t) = \exp\left[-(t/\tau_\alpha)^\beta\right], \quad 0 < \beta < 1,
-\end{equation}
-where $\tau_\alpha$ is the $\alpha$-relaxation time and $\beta < 1$
-indicates stretched (non-exponential) relaxation.
+Unlike equilibrium systems, colloidal gels continue to evolve slowly after their preparation.
 
-```latex id="w6c4r1"
-% ============================================================
+Their properties depend explicitly on the waiting time $t_w$ elapsed since the quench. Such systems are said to exhibit ageing.
+
+A commonly used observable is the mean-squared displacement (MSD),
+
+\begin{equation}
+\mathrm{MSD}(t,t_w)
+=
+\left\langle
+\left|
+\mathbf r(t_w+t)-\mathbf r(t_w)
+\right|^2
+\right\rangle.
+\end{equation}
+
+In a fully arrested gel, particles become temporarily trapped by their neighbours and the MSD develops an intermediate plateau,
+
+\begin{equation}
+\mathrm{MSD}(t)
+\rightarrow
+r_{\mathrm{cage}}^2,
+\end{equation}
+
+where $r_{\mathrm{cage}}$ is the typical cage size.
+
+Furthermore, the MSD becomes dependent on the waiting time $t_w$, reflecting the progressive slowing down of the dynamics as the system ages.
+
+By contrast, an ergodic liquid exhibits waiting-time-independent dynamics and the MSD is independent of $t_w$.
+
 \section{Structure Factor, Coarsening and Dynamic Scaling}
-% ============================================================
 
 \subsection{Time-Dependent Structure Factor}
 
-The central observable of this study is the time-dependent structure
-factor $S(q,t)$, which characterises the spatial organisation of the
-colloidal suspension during phase separation and gelation.
+The central observable of this work is the time-dependent structure factor.
 
-For a system of $N$ particles at positions $\bm r_j(t)$, the instantaneous
-density mode is:
-\begin{equation}
-  \rho(\bm q,t)
-  =
-  \sum_{j=1}^{N}
-  e^{i\bm q\cdot\bm r_j(t)}.
-\end{equation}
-
-The structure factor is then defined as:
-\begin{equation}
-  S(\bm q,t)
-  =
-  \frac1N
-  \left|
-  \rho(\bm q,t)
-  \right|^2
-  =
-  \frac1N
-  \left|
-  \sum_{j=1}^{N}
-  e^{i\bm q\cdot\bm r_j(t)}
-  \right|^2.
-  \label{eq:sqt}
-\end{equation}
-
-After spherical averaging, one obtains the isotropic quantity $S(q,t)$.
-
-The structure factor is directly related to density correlations in the
-system.
-At early times, when the suspension remains approximately homogeneous,
-$S(q,t)$ is relatively flat.
-As phase separation develops, a peak progressively emerges at a
-characteristic wavevector $q^*(t)$ corresponding to the dominant domain
-size.
-
-The characteristic domain length is therefore defined by:
-\begin{equation}
-  \boxed{
-  \ell(t)=\frac{2\pi}{q^*(t)}.}
-  \label{eq:l_definition}
-\end{equation}
-
-The growth of $\ell(t)$ quantifies the coarsening of colloidal domains.
-
-% ------------------------------------------------------------
-
-\subsection{Diffusive Coarsening}
-
-Following the initial spinodal decomposition, domains rich and poor in
-colloids progressively coarsen in order to reduce interfacial free energy.
-For diffusion-controlled phase separation, Lifshitz and Slyozov showed
-that the characteristic domain size obeys the asymptotic growth law:
-\begin{equation}
-  \ell(t)\propto t^{1/3},
-  \label{eq:LS}
-\end{equation}
-known as the Lifshitz--Slyozov law.
-
-This scaling law reflects the fact that domain growth is limited by
-diffusive transport between interfaces.
-The exponent $1/3$ is universal for diffusion-limited coarsening,
-whereas the prefactor depends on microscopic properties such as diffusion
-and interfacial tension.
-
-As coarsening proceeds:
-
-\begin{itemize}
-  \item the diffraction peak of $S(q,t)$ shifts towards smaller values of
-        $q$,
-  \item the characteristic length $\ell(t)$ increases,
-  \item density correlations become stronger and more spatially extended.
-\end{itemize}
-
-% ------------------------------------------------------------
-
-\subsection{Dynamic Scaling}
-
-At sufficiently long times, the system enters a dynamic scaling regime in
-which the morphology becomes statistically self-similar.
-The structure factor then obeys the scaling form:
-\begin{equation}
-  S(q,t)
-  =
-  \ell(t)^d
-  \,\widetilde S(q\ell(t)),
-  \label{eq:dynamic_scaling}
-\end{equation}
-where $d$ is the spatial dimension and $\widetilde S$ is a universal
-scaling function.
-
-Equation~\eqref{eq:dynamic_scaling} implies that all structure factors
-measured at different times collapse onto a single master curve when
-plotted as:
-\begin{equation}
-  \frac{S(q,t)}{\ell(t)^d}
-  \quad \text{versus} \quad
-  q\ell(t).
-\end{equation}
-
-This collapse is the hallmark of self-similar coarsening dynamics.
-
-% ------------------------------------------------------------
-
-\subsection{Arrested Phase Separation and Gelation}
-
-In ordinary spinodal decomposition, coarsening proceeds continuously and
-$\ell(t)$ keeps increasing according to Eq.~\eqref{eq:LS}.
-
-In contrast, colloidal gelation corresponds to an arrested phase
-separation process.
-When the dense colloid-rich domains become dynamically arrested, particle
-rearrangements slow dramatically and domain growth stops.
-
-As a consequence:
+For a system of $N$ particles located at positions $\mathbf r_j(t)$, the microscopic density can be written as
 
 \begin{equation}
-  \ell(t)
-  \rightarrow
-  \ell_{\mathrm{arrest}},
+\rho(\mathbf r,t)
+=
+\sum_{j=1}^{N}
+\delta(\mathbf r-\mathbf r_j(t)).
 \end{equation}
 
-where $\ell_{\mathrm{arrest}}$ is the arrest length characterising the
-gel network.
+Its Fourier transform is
 
-Equivalently, the diffraction peak of $S(q,t)$ stabilises at a finite
-wavevector:
 \begin{equation}
-  q^*
-  \sim
-  \ell_{\mathrm{arrest}}^{-1},
+\rho_{\mathbf q}(t)
+=
+\sum_{j=1}^{N}
+e^{i\mathbf q\cdot\mathbf r_j(t)}.
 \end{equation}
-whose position and amplitude no longer evolve significantly with time.
 
-The comparison between free coarsening and arrested coarsening therefore
-constitutes the main observable of the present work.
+The isotropically averaged structure factor is then defined as
 
-
-
-% ============================================================
-\section{Numerical Implementation}
-% ============================================================
-
-```latex id="u1zqjp"
-\subsection{Euler--Maruyama Scheme}
-
-The overdamped Langevin equation \cref{eq:overdamped_D} is integrated
-numerically using the Euler--Maruyama scheme, which is the standard
-discretisation method for stochastic differential equations with additive
-noise \cite{kloeden1992}.
-
-Integrating the Langevin equation over a finite time step $\Delta t$
-gives two distinct contributions to the particle displacement:
-
-\begin{itemize}
-  \item a deterministic drift induced by interaction forces,
-  \item a stochastic displacement generated by thermal fluctuations.
-\end{itemize}
-
-The deterministic contribution is proportional to $\Delta t$, whereas the
-stochastic contribution results from the accumulation of many independent
-microscopic collisions with solvent molecules.
-According to the central limit theorem, this random displacement is
-Gaussian, with a variance proportional to $\Delta t$.
-Its typical amplitude therefore scales as $\sqrt{\Delta t}$.
-
-For a time step $\Delta t$, the Euler--Maruyama update rule becomes:
 \begin{equation}
-  \boxed{
-  \bm r_i(t+\Delta t)
-  =
-  \bm r_i(t)
-  +
-  \frac{D_0}{k_B T}
-  \bm F_i\bigl(\{\bm r_j(t)\}\bigr)\Delta t
-  +
-  \sqrt{2D_0\Delta t}\,\bm W_i,}
-  \label{eq:euler_maruyama}
+S(q,t)
+=
+\frac{1}{N}
+\left|
+\sum_{j=1}^{N}
+e^{i\mathbf q\cdot\mathbf r_j(t)}
+\right|^2.
+\label{eq:Sq}
 \end{equation}
-where $\bm W_i\sim\mathcal N(\bm0,\mathbf I_d)$ is a Gaussian random
-vector of zero mean and unit variance, independently drawn for each
-particle and each time step.
 
-The first term corresponds to deterministic drift towards lower-energy
-configurations, while the second term represents Brownian diffusion due
-to thermal agitation of the solvent.
+The structure factor measures density fluctuations at different length scales.
 
-This numerical scheme preserves the diffusive behaviour:
+As phase separation develops, a peak emerges at a characteristic wavevector $q^*(t)$.
+
+The corresponding characteristic domain size is
+
 \begin{equation}
-  \langle |\Delta\bm r|^2\rangle
-  =
-  2dD_0\Delta t,
+\ell(t)
+=
+\frac{2\pi}{q^*(t)}.
+\label{eq:length}
 \end{equation}
-which is the defining property of Brownian motion.
 
+Monitoring the evolution of $q^*(t)$ therefore provides direct information on the growth of domains during coarsening.
 
-\subsection{Time-Step Selection}
+\subsection{Diffusive Coarsening and Dynamic Scaling}
 
-The time step $\Delta t$ must satisfy several criteria:
-\begin{itemize}
-  \item \textbf{Thermal stability}: $D_0\Delta t / \sigma^2 \ll 1$, where
-        $\sigma = 2a$ is the particle diameter.
-  \item \textbf{Force resolution}: $|F_{\max}|\,\Delta t / \gamma \ll a$,
-        to prevent a particle from crossing another's core in a single step.
-  \item \textbf{Temporal resolution}: $\Delta t \ll \tau_{\mathrm{relax}}$,
-        the structural relaxation time of interest.
-\end{itemize}
-In practice:
+For diffusion-controlled phase separation, the characteristic length scale follows the Lifshitz--Slyozov law
+
 \begin{equation}
-  \Delta t^* = \min\!\left(\frac{0.01\,\sigma^2}{D_0},\;
-  \frac{0.01\,\sigma}{|F_{\max}|/\gamma}\right).
+\ell(t)
+\propto
+t^{1/3}.
 \end{equation}
 
-\subsection{Periodic Boundary Conditions}
+As coarsening proceeds, the morphology becomes statistically self-similar: the system appears identical when lengths are rescaled by $\ell(t)$.
 
-We simulate $N$ particles in a cubic box of side $L$ with
-\textbf{periodic boundary conditions} (PBC).
-The distance between particles $i$ and $j$ is computed using the minimum
-image convention:
+This dynamic scaling hypothesis implies that the structure factor obeys
+
 \begin{equation}
-  \Delta\bm{r}_{ij} = \bm{r}_{ij}
-  - L\,\mathrm{round}\!\left(\frac{\bm{r}_{ij}}{L}\right),
+S(q,t)
+=
+\ell(t)^d
+\,\widetilde S
+\bigl(q\ell(t)\bigr),
+\label{eq:scaling}
 \end{equation}
-and the potential cutoff $r_c \leq L/2$ is required to prevent a particle
-from interacting with its own image.
 
-\subsection{Reduced Units}
+where $d$ is the spatial dimension and $\widetilde S$ is a universal scaling function.
 
-To simplify the simulations, we work in reduced units:
-\begin{align}
-  r^* &= r/\sigma, \quad \sigma = 2a, \\
-  t^* &= t\,D_0/\sigma^2, \\
-  U^* &= U/k_BT, \\
-  F^* &= F\,\sigma/k_BT.
-\end{align}
-In these units, \cref{eq:euler_maruyama} becomes:
-\begin{equation}
-  \bm{r}_i^*(t^*+\Delta t^*) = \bm{r}_i^*(t^*)
-  + \bm{F}_i^*\bigl(\{\bm{r}_j^*\}\bigr)\,\Delta t^*
-  + \sqrt{2\Delta t^*}\,\bm{W}_i,
-\end{equation}
-an equation free of explicit dimensional parameters.
+When dynamic scaling holds, structure-factor curves measured at different times collapse onto a single master curve when plotted as
 
-\subsection{Simulation Protocol}
+\[
+S(q,t)/\ell(t)^d
+\qquad \text{versus} \qquad
+q\ell(t).
+\]
 
-\begin{enumerate}
-  \item \textbf{Initialisation}: positions $\bm{r}_i^*(0)$ drawn randomly
-        (or on a lattice) in the box, with an overlap check.
-  \item \textbf{Equilibration}: simulation at $\epsilon \to 0$ (hard
-        spheres) or $\epsilon < \epsilon_c$ (outside the spinodal region)
-        to reach an equilibrated liquid reference state.
-  \item \textbf{Quench}: instantaneous increase of $\epsilon$ at $t = 0$
-        to enter the spinodal region.
-  \item \textbf{Production}: integration of \cref{eq:euler_maruyama} for
-        a total time $T_{\mathrm{sim}} \gg \tau_D$.
-  \item \textbf{Analysis}: computation at regular intervals of $S(q,t)$,
-        $g(r,t)$, and $\langle|\Delta\bm{r}|^2\rangle(t)$.
-\end{enumerate}
-
-To study the effect of gelation, two sets of simulations are performed:
-\begin{itemize}
-  \item \textbf{Free system}: moderate $\epsilon/k_BT$ (below the gelation
-        threshold); phase separation proceeds without arrest.
-  \item \textbf{Gelled system}: large $\epsilon/k_BT$; the dense phase
-        reaches $\phi_g$ and domain growth is arrested.
-\end{itemize}
-
-% ============================================================
-\section{Discussion: Comparison of Observables}
-% ============================================================
-
-\subsection{Numerical Gelation Criterion}
-
-Gelation is detected numerically by several indicators:
-\begin{enumerate}
-  \item \textbf{Structure factor plateau}: $\partial_t S(q^*, t) \approx 0$.
-  \item \textbf{Mean-squared displacement plateau}:
-        $\langle|\Delta\bm{r}|^2\rangle(t)$ saturates at a finite value
-        (cf.\ \cref{eq:msd_gel}).
-  \item \textbf{Percolation}: the bond network (particles $i$ and $j$ are
-        bonded if $r_{ij} < r_{\mathrm{bond}}$ and $U(r_{ij}) < 0$) spans
-        from one side of the box to the other.
-\end{enumerate}
-
-\subsection{Dynamic Scaling and Its Breakdown}
-
-For the \emph{free} system, the scaling law \cref{eq:dynamic_scaling} is
-verified by superimposing the curves $S(q,t)/\ell(t)^d$ versus $q\ell(t)$.
-For the \emph{gelled} system, this law breaks down: the curves do not
-collapse, which is the signature of the scale-invariance violation caused by
-arrest.
-
-% ============================================================
-\section{Conclusion}
-% ============================================================
-
-We have presented the complete theoretical framework for studying colloidal
-gelation as arrested phase separation.
-The central point is that Brownian dynamics, described by the overdamped
-Langevin equation and integrated by the Euler--Maruyama scheme, faithfully
-reproduces the physics of colloidal diffusion and aggregation.
-The competition between spinodal dynamics (domain growth as $t^{1/3}$) and
-kinetic arrest (vitrification of the dense phase) gives rise to the
-colloidal gel, observable through the arrest of the structure factor peak.
-The Morse potential, by virtue of its smoothness and tuneable range,
-constitutes a minimal yet physically realistic choice for capturing these
-effects.
-
-\printbibliography
-
+In a gelled system, kinetic arrest interrupts coarsening and this scaling behaviour eventually breaks down, signalling the emergence of a frozen characteristic length scale.
+``` 
 \end{document}

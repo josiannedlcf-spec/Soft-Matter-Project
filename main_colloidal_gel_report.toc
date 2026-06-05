@@ -1,0 +1,38 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Brownian Motion and Colloidal Diffusion}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}The Langevin Equation}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Overdamped Limit: Brownian Dynamics}{2}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Colloidal Interactions}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Pair Potentials Between Colloids}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Choice of Potential for Simulations}{3}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Phase Separation in Colloidal Suspensions}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Phase Diagram and Spinodal Instability}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Spinodal Decomposition: the Cahn--Hilliard Theory}{4}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Gelation as Arrested Phase Separation}{5}{section.5}%
+\contentsline {subsection}{\numberline {5.1}General Mechanism}{5}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Ageing and Non-Equilibrium States}{5}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Structure Factor, Coarsening and Dynamic Scaling}{5}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Time-Dependent Structure Factor}{5}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Diffusive Coarsening and Dynamic Scaling}{6}{subsection.6.2}%
+\contentsline {section}{\numberline {7}Numerical Implementation}{6}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Euler--Maruyama Scheme}{6}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Numerical Challenges and Corrections}{6}{subsection.7.2}%
+\contentsline {subsubsection}{\numberline {7.2.1}Integrator Instability}{6}{subsubsection.7.2.1}%
+\contentsline {subsubsection}{\numberline {7.2.2}Insufficient Simulation Time}{6}{subsubsection.7.2.2}%
+\contentsline {subsubsection}{\numberline {7.2.3}Unphysical WCA Reference State}{7}{subsubsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.3}MSD and Ageing Protocol}{7}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Summary of Simulation Parameters}{7}{subsection.7.4}%
+\contentsline {section}{\numberline {8}Results: Particle Configurations}{7}{section.8}%
+\contentsline {section}{\numberline {9}Results: Structure Factor Analysis}{8}{section.9}%
+\contentsline {subsection}{\numberline {9.1}$S(k,t)$ Evolution}{8}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Final Structure Factor: Gel versus Liquid}{9}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Peak Wavevector $k^*(t)$}{9}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Peak Amplitude $S(k^*,t)$}{10}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}Final Particle Configurations: Gel versus Liquid}{10}{subsection.9.5}%
+\contentsline {section}{\numberline {10}Results: MSD and Ageing Analysis}{11}{section.10}%
+\contentsline {subsection}{\numberline {10.1}MSD of the Gel}{11}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}MSD of the Liquid Reference}{12}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Ageing Comparison: Gel versus Liquid}{13}{subsection.10.3}%
+\contentsline {section}{\numberline {11}Limitations and Perspectives}{13}{section.11}%
+\contentsline {section}{\numberline {12}Conclusion}{14}{section.12}%
