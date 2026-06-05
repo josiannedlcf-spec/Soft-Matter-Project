@@ -1,0 +1,109 @@
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{Coarsening and Arrest in Colloidal Gels:\\Modelling via Brownian Dynamics}
+\author{Bérénice Derai}
+\date{}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+This report investigates coarsening and arrest in colloidal gels using Brownian Dynamics simulations.
+
+\section{Results}
+
+\subsection{Particle configurations}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/01_positions_gel.png}
+\caption{Particle configurations for the gel.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/01_positions_liquid.png}
+\caption{Particle configurations for the liquid reference.}
+\end{figure}
+
+\subsection{Structure factor}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/02_Sk_evolution_gel.png}
+\caption{Structure factor evolution in the gel.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/02_Sk_evolution_liquid.png}
+\caption{Structure factor evolution in the liquid.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/03_Sk_final_comparison.png}
+\caption{Final structure factor comparison.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{plots/04_kstar_vs_time.png}
+\caption{Peak wavevector $k^\star(t)$.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{plots/05_Sstar_vs_time.png}
+\caption{Peak structure factor amplitude.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/06_final_positions_comparison.png}
+\caption{Final particle configurations.}
+\end{figure}
+
+\subsection{Ageing and MSD}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/07_MSD_gel.png}
+\caption{MSD in the gel.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/07_MSD_liquid.png}
+\caption{MSD in the liquid.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{plots/08_MSD_ageing_comparison.png}
+\caption{Ageing comparison.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{plots/09_MSD_vs_tw.png}
+\caption{MSD versus waiting time.}
+\end{figure}
+
+\end{document}
